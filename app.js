@@ -1,40 +1,27 @@
-var rpio = require('rpio');
-const express = require('express');
-const app = express();
 
-app.get('/', function (req, res) {
-  res.send('Hello World!');
-  console.log('Hello Landed');
-});
+const SerialPort = require('serialport');
+const Readline = SerialPort.parsers.Readline;
+const port = new SerialPort('/dev/ttyACM0', { baudrate: 9600 });
+const parser = port.pipe(new Readline({ delimiter: '\r\n' }));
 
-app.get( '/run', function (req, res) {
-	/*
-	 * Set the initial state to low.  The state is set prior to the pin becoming
-	 * active, so is safe for devices which require a stable setup.
-	 */
-	rpio.open(12, rpio.OUTPUT, rpio.LOW);
-
-	/*
-	 * The sleep functions block, but rarely in these simple programs does one care
-	 * about that.  Use a setInterval()/setTimeout() loop instead if it matters.
-	 */
-	for (var i = 0; i < 5; i++) {
-	        /* On for 1 second */
-	        rpio.write(12, rpio.HIGH);
-			console.log('high');
-	        rpio.sleep(1);
-
-	        /* Off for half a second (500ms) */
-	        rpio.write(12, rpio.LOW);
-			console.log('low');
-	        rpio.msleep(500);
-	}
-
-	res.send('Done Blicking!')
-
-} );
+parser.on('data', console.log);
 
 
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!')
+setInterval( function () {
+	port.write( 'main screen turn on \n', function(err) {
+		if (err) {
+			return console.log('Error on write: ', err.message);
+		}
+		console.log("Message Written");
+	});
+}, 100 );
+
+// Open errors will be emitted as an error event
+port.on('error', function(err) {
+  console.log('Error: ', err.message);
 })
+/*
+port.on('data', function (data) {
+  console.log('Data:', data);
+});
+*/

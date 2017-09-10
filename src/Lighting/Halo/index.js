@@ -5,7 +5,11 @@ export class Halo extends Component {
   click(e) {
     let opp = e.target.checked ? 'on' : 'off';
     let color = e.target.checked ? 'light-blue' : 'black';
-    Materialize.toast('Turned light on ' + opp, 4000, color);
+    Materialize.toast('Turned light ' + opp, 4000, color);
+
+    fetch('http://rramo012:4000/turn-led?type=' + opp).then(function(response) {
+      console.log(response);
+    });
   }
 
   render(props) {
